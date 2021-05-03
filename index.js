@@ -117,7 +117,7 @@ app.get('/', function (req, res) {
   res.json({hi: 'send ticker'});
 });
 
-app.get('/stockData/:ticker', cors(corsOptionsDelegate), async function (req, res) {
+app.get('/stockData/:ticker', async function (req, res) {
   var ticker = req.params.ticker;
   const data = await getStockData(ticker);
 
