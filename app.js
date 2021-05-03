@@ -3,7 +3,7 @@ const dayjs = require('dayjs');
 const axios = require('axios');
 const _ = require('lodash');
 const express = require('express');
-// const cors = require('cors')
+const cors = require('cors')
 
 const app = express();
 
@@ -12,22 +12,22 @@ const app = express();
 //   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 // };
 
-// const whitelist = ['http://127.0.0.1:5500', 'https://babathebest.com'];
+const whitelist = ['http://127.0.0.1:5500', 'https://babathebest.com'];
 
-// const corsOptionsDelegate = (req, callback) => {
-//   let corsOptions;
+const corsOptionsDelegate = (req, callback) => {
+  let corsOptions;
 
-//   let isDomainAllowed = whitelist.indexOf(req.header('Origin')) !== -1;
+  let isDomainAllowed = whitelist.indexOf(req.header('Origin')) !== -1;
 
-//   if (isDomainAllowed) {
-//       // Enable CORS for this request
-//       corsOptions = { origin: true }
-//   } else {
-//       // Disable CORS for this request
-//       corsOptions = { origin: false }
-//   }
-//   callback(null, corsOptions)
-// };
+  if (isDomainAllowed) {
+      // Enable CORS for this request
+      corsOptions = { origin: true }
+  } else {
+      // Disable CORS for this request
+      corsOptions = { origin: false }
+  }
+  callback(null, corsOptions)
+};
 
 async function getPartialData(ticker, prevDate, curDate) {
   let url = `https://in.finance.yahoo.com/quote/${ticker}/history?period1=${prevDate}&period2=${curDate}&interval=1d`;
@@ -117,7 +117,7 @@ app.get('/', function (req, res) {
   res.json({hi: 'send ticker'});
 });
 
-app.get('/stockData/:ticker', async function (req, res) {
+app.get('/stockData/:ticker', cors(corsOptionsDelegate), async function (req, res) {
   var ticker = req.params.ticker;
   const data = await getStockData(ticker);
 
