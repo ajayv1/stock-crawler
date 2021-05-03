@@ -2,9 +2,9 @@
   "name": "stock-crawler",
   "version": "1.0.0",
   "description": "Crawling stock",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node app.js"
   },
   "keywords": [
     "stock"
