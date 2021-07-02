@@ -137,14 +137,12 @@ app.get('/stockData/:ticker', cors(corsOptionsDelegate), async function (req, re
   var ticker = req.params.ticker;
   var isReduce = req.query.reduce;
   const data = await getStockData(ticker);
-  const finalData;
+  const finalData = data;
 
   if (isReduce) {
     finalData = removeRedundantData(data);
-  } else {
-    finalData = data;
-  }
-
+  } 
+  
   var response = {
     ticker: ticker,
     data: data
