@@ -32,7 +32,7 @@ const corsOptionsDelegate = (req, callback) => {
 async function getPartialData(ticker, prevDate, curDate) {
   let url = `https://in.finance.yahoo.com/quote/${ticker}/history?period1=${prevDate}&period2=${curDate}&interval=1d`;
 
-  console.log(url);
+  // console.log(url);
   let row = new Map();
   let response;
   try {
@@ -89,6 +89,7 @@ async function getStockData(ticker) {
   for(var i = resLen - 1; i >= 0; i--) {
     var obj = final[result[i][0]];
     var parseClosedPrice = parseFloat(obj.close.replace(/,/g, ''));
+    var temp;
     if (counter >= 200) {
       if (i + 200 === resLen - 1) {
         sum = sum;
@@ -99,9 +100,11 @@ async function getStockData(ticker) {
           parseFloat(final[result[i+200+1][0]].close.replace(/,/g, ''));
       }
 
-      obj['200DMA'] = sum / 200;
-      obj['Change'] = parseClosedPrice - obj['200DMA'];
-      obj['Variation'] = (obj['Change'] / parseClosedPrice) * 100 ;
+      temp = sum / 200;
+
+      obj['200DMA'] = temp.toFixed(2);
+      obj['Change'] = (parseClosedPrice - obj['200DMA']).toFixed(2);
+      obj['Variation'] = ((obj['Change'] / parseClosedPrice) * 100).toFixed(2) ;
     } else {
       obj['200DMA'] = '';
       obj['Change'] = '';
@@ -117,9 +120,30 @@ app.get('/', function (req, res) {
   res.json({hi: 'send ticker'});
 });
 
+function removeRedundantData (stockData) {
+  var data = {};
+
+  for (var key in stockData) {
+    if (!stockData.hasOwnProperty(key)) continue;
+    var obj = stockData[key];
+    
+    if (!obj['200DMA']) continue;
+
+    data[key] = obj;
+  }
+}
+
 app.get('/stockData/:ticker', cors(corsOptionsDelegate), async function (req, res) {
   var ticker = req.params.ticker;
+  var isReduce = req.query.reduce;
   const data = await getStockData(ticker);
+  const finalData;
+
+  if (isReduce) {
+    finalData = removeRedundantData(data);
+  } else {
+    finalData = data;
+  }
 
   var response = {
     ticker: ticker,
