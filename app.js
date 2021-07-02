@@ -12,7 +12,7 @@ const app = express();
 //   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 // };
 
-const whitelist = ['http://127.0.0.1:5500', 'https://babathebest.com'];
+const whitelist = ['http://127.0.0.1', 'https://babathebest.com'];
 
 const corsOptionsDelegate = (req, callback) => {
   let corsOptions;
@@ -121,6 +121,7 @@ app.get('/', function (req, res) {
 });
 
 function removeRedundantData (stockData) {
+
   var data = {};
 
   for (var key in stockData) {
@@ -131,24 +132,37 @@ function removeRedundantData (stockData) {
 
     data[key] = obj;
   }
+
+  return data;
 }
 
 app.get('/stockData/:ticker', cors(corsOptionsDelegate), async function (req, res) {
   var ticker = req.params.ticker;
   var isReduce = req.query.reduce;
-  const data = await getStockData(ticker);
-  const finalData = data;
 
-  if (isReduce) {
-    finalData = removeRedundantData(data);
-  } 
+  try {
+    const data = await getStockData(ticker);
+    let finalData;
+
+    if (isReduce) {
+      finalData = removeRedundantData(data);
+    } else {
+      finalData = data;
+    }
+
+    var response = {
+      ticker: ticker,
+      data: finalData
+    };
+
+    res.status(200).json(response);
+  } catch (err) {
+    res.status(200).json({
+      message: err
+    });
+  }
+
   
-  var response = {
-    ticker: ticker,
-    data: data
-  };
-
-  res.status(200).json(response);
 })
 
 const PORT = process.env.PORT || 3000;
